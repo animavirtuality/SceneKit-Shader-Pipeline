@@ -13,6 +13,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
     
+    var box: SCNNode!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -22,11 +24,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Show statistics such as fps and timing information
         sceneView.showsStatistics = true
         
-        // Create a new scene
-        let scene = SCNScene(named: "art.scnassets/ship.scn")!
-        
         // Set the scene to the view
-        sceneView.scene = scene
+        sceneView.scene = SCNScene()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -34,9 +33,24 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Create a session configuration
         let configuration = ARWorldTrackingConfiguration()
+        
+        configuration.planeDetection = .horizontal
 
         // Run the view's session
         sceneView.session.run(configuration)
+        
+        makeBox()
+    }
+    
+    
+    private func makeBox(){
+        box = SCNNode()
+        box.geometry = SCNBox(width: 1, height: 1, length: 1, chamferRadius: 0.1)
+        let whiteMaterial = SCNMaterial()
+        whiteMaterial.diffuse.contents = UIColor.white
+        box.geometry?.materials[0] = whiteMaterial
+        
+        whiteMaterial.shaderModifiers = [.fragment : colorFragShader]
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -45,30 +59,19 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Pause the view's session
         sceneView.session.pause()
     }
+    
+    
 
     // MARK: - ARSCNViewDelegate
-    
-/*
+
     // Override to create and configure nodes for anchors added to the view's session.
     func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
-        let node = SCNNode()
-     
-        return node
-    }
-*/
-    
-    func session(_ session: ARSession, didFailWithError error: Error) {
-        // Present an error message to the user
+        guard box.parent == nil,
+              anchor is ARPlaneAnchor
+        else {return nil}
         
+        return box
     }
-    
-    func sessionWasInterrupted(_ session: ARSession) {
-        // Inform the user that the session has been interrupted, for example, by presenting an overlay
-        
-    }
-    
-    func sessionInterruptionEnded(_ session: ARSession) {
-        // Reset tracking and/or remove existing anchors if consistent tracking is required
-        
-    }
+
+
 }
