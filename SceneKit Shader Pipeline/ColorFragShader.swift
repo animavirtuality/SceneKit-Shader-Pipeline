@@ -20,6 +20,5 @@ using namespace metal;
 const float3 worldFragmentPosition = (float4(_surface.position, 1.0f) * scn_frame.inverseViewTransform).xyz;
 
 //Final add
-//Using Screen blending
 _output.color.rgb = worldFragmentPosition;
 """
